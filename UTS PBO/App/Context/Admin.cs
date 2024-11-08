@@ -11,12 +11,6 @@ using UTS_PBO.App.Models;
 
 namespace UTS_PBO.App.Context
 {
-    using System.Data;
-using Npgsql;
-using UTS_PBO.App.Core;
-
-namespace UTS_PBO.App.Context
-{
     internal class Admin : Database
     {
         private static string table = "users";
