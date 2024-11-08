@@ -18,21 +18,16 @@ namespace UTS_PBO.App.Core
         private static readonly string DB_PORT = "5432";
 
         private static NpgsqlConnection connection;
-        private static NpgsqlCommand command;
 
-        // Method open dan close Koneksi
         public static void openConnection()
         {
             connection = new NpgsqlConnection($"Host={DB_HOST};Username={DB_USERNAME};Password={DB_PASSWORD};Database={DB_DATABASE};Port={DB_PORT}");
             connection.Open();
-            command = new NpgsqlCommand();
-            command.Connection = connection;
         }
 
         public static void closeConnection()
         {
             connection.Close();
-            command.Parameters.Clear();
         }
 
         public static DataTable queryExecutor(string query, NpgsqlParameter[] parameters = null)
@@ -40,38 +35,52 @@ namespace UTS_PBO.App.Core
             try
             {
                 openConnection();
-                DataTable dataTable = new DataTable();
-                command.CommandText = query;
-                if (parameters != null)
+                using (var command = new NpgsqlCommand(query, connection))
                 {
-                    command.Parameters.AddRange(parameters);
-                    command.Prepare();
+                    if (parameters != null)
+                    {
+                        command.Parameters.AddRange(parameters);
+                    }
+
+                    using (NpgsqlDataAdapter dataAdapter = new NpgsqlDataAdapter(command))
+                    {
+                        DataTable dataTable = new DataTable();
+                        dataAdapter.Fill(dataTable);
+                        return dataTable;
+                    }
                 }
-                NpgsqlDataAdapter dataAdapter = new NpgsqlDataAdapter(command);
-                dataAdapter.Fill(dataTable);
-                closeConnection();
-                return dataTable;
             }
             catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
+            finally
+            {
+                closeConnection();
+            }
         }
+
         public static void commandExecutor(string query, NpgsqlParameter[] parameters = null)
         {
             try
             {
                 openConnection();
-                command.CommandText = query;
-                command.Parameters.AddRange(parameters);
-                command.Prepare();
-                command.Parameters.Clear();
-                command.ExecuteNonQuery();
-                closeConnection();
+                using (var command = new NpgsqlCommand(query, connection))
+                {
+                    if (parameters != null)
+                    {
+                        command.Parameters.AddRange(parameters);
+                    }
+                    command.ExecuteNonQuery();
+                }
             }
             catch (Exception e)
             {
                 throw new Exception(e.Message);
+            }
+            finally
+            {
+                closeConnection();
             }
         }
     }
