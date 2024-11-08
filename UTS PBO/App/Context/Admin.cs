@@ -11,68 +11,48 @@ using UTS_PBO.App.Models;
 
 namespace UTS_PBO.App.Context
 {
+    using System.Data;
+using Npgsql;
+using UTS_PBO.App.Core;
+
+namespace UTS_PBO.App.Context
+{
     internal class Admin : Database
     {
-            private static string table = "users";
+        private static string table = "users";
 
-            public static DataTable All()
+        public static DataTable All()
+        {
+            string query = $"SELECT id, nama, email, username, password FROM {table};";
+            return queryExecutor(query);
+        }
+
+        public static DataTable GetUserById(int id)
+        {
+            string query = $"SELECT id, nama, email, username, password FROM {table} WHERE id = @id;";
+            NpgsqlParameter[] parameters =
             {
-            string query = @"
-        SELECT 
-            m.id,
-            m.nama,
-            m.email,
-            m.username,
-            m.password,
-           FROM 
-            users m
-        WHERE 
-                    m.id = @id;
-
-                DataTable datausers = queryExecutor(query);
-                return datausers;
-            }
-
-            public static DataTable getusersById(int id)
-            {
-                string query = @""
-        SELECT 
-            m.id,
-            m.nama,
-            m.email,
-            m.username,
-            m.password,
-        FROM 
-            users m
-            WHERE 
-                    m.id = @id"; 
-                NpgsqlParameter[] parameters =
-                {
                 new NpgsqlParameter("@id", NpgsqlTypes.NpgsqlDbType.Integer) { Value = id }
             };
 
-                DataTable datausers = queryExecutor(query, parameters);
-                return datausers;
-            }
+            return queryExecutor(query, parameters);
+        }
 
-
-            public static void Addusers(Admin usersBaru)
+        public static void AddUser(Admin newUser)
+        {
+            string query = $"INSERT INTO {table} (nama, email, password) VALUES(@nama, @email, @password);";
+            NpgsqlParameter[] parameters =
             {
-                string query = $"INSERT INTO {table} (nama, email, password) VALUES(@nama, @email, @password)";
-
-                NpgsqlParameter[] parameters =
-                {
-                new NpgsqlParameter("@nama", usersBaru.nama),
-                new NpgsqlParameter("@email", usersBaru.email),
-                new NpgsqlParameter("@password", usersBaru.password)
+                new NpgsqlParameter("@nama", newUser.nama),
+                new NpgsqlParameter("@email", newUser.email),
+                new NpgsqlParameter("@password", newUser.password)
             };
 
-                commandExecutor(query, parameters);
-            }
-
-            
-            
+            commandExecutor(query, parameters);
         }
+    }
+}
+
     }
 
 
