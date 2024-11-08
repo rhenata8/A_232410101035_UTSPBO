@@ -15,54 +15,29 @@ namespace UTS_PBO.App.Context
 
         public static DataTable All()
         {
-            string query = @"
-        SELECT 
-            m.id,
-            m.nama,
-            m.email,
-            m.username,
-            m.password,
-           FROM 
-            users m
-        WHERE 
-                    m.id = @id;
+            string query = $"SELECT id, nama, email, username, password FROM {table};";
+            return queryExecutor(query);
+        }
 
-                DataTable datausers = queryExecutor(query);
-                return datausers;
-            }
-
-            public static DataTable getusersById(int id)
-            {
-                string query = @""
-        SELECT 
-            m.id,
-            m.nama,
-            m.email,
-            m.username,
-            m.password,
-        FROM 
-            users m
-            WHERE 
-                    m.id = @id";
+        public static DataTable GetUserById(int id)
+        {
+            string query = $"SELECT id, nama, email, username, password FROM {table} WHERE id = @id;";
             NpgsqlParameter[] parameters =
             {
                 new NpgsqlParameter("@id", NpgsqlTypes.NpgsqlDbType.Integer) { Value = id }
             };
 
-            DataTable datausers = queryExecutor(query, parameters);
-            return datausers;
+            return queryExecutor(query, parameters);
         }
 
-
-        public static void Addusers(Admin usersBaru)
+        public static void AddUser(Customer newUser)
         {
-            string query = $"INSERT INTO {table} (nama, email, password) VALUES(@nama, @email, @password)";
-
+            string query = $"INSERT INTO {table} (nama, email, password) VALUES(@nama, @email, @password);";
             NpgsqlParameter[] parameters =
             {
-                new NpgsqlParameter("@nama", usersBaru.nama),
-                new NpgsqlParameter("@email", usersBaru.email),
-                new NpgsqlParameter("@password", usersBaru.password)
+                new NpgsqlParameter("@nama", newUser.nama),
+                new NpgsqlParameter("@email", newUser.email),
+                new NpgsqlParameter("@password", newUser.password)
             };
 
             commandExecutor(query, parameters);
